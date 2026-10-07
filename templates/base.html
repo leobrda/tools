@@ -48,12 +48,13 @@
   <!-- Header / Navbar estilo janela retrô/neobrutalista -->
   <header class="border-b-4 border-black bg-white sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-      <a href="{% url 'converter_view' %}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-neoGreen border-2 border-black shadow-neo-sm font-mono font-bold tracking-tight text-lg hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
+      <a href="{% url 'home_view' %}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-neoGreen border-2 border-black shadow-neo-sm font-mono font-bold tracking-tight text-lg hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
         <span>&lt;/&gt;</span>
         <span>TOOLSHUB.DEV</span>
       </a>
 
       <nav class="flex items-center gap-3 text-sm font-bold">
+        <a href="{% url 'home_view' %}" class="px-3 py-1 bg-white border-2 border-black shadow-neo-sm hover:bg-gray-100 transition-all">Início</a>
         <a href="{% url 'converter_view' %}" class="px-3 py-1 bg-white border-2 border-black shadow-neo-sm hover:bg-neoGreen transition-all">Converter</a>
         <a href="{% url 'comprimir_view' %}" class="px-3 py-1 bg-white border-2 border-black shadow-neo-sm hover:bg-neoYellow transition-all">Comprimir</a>
         <a href="{% url 'remover_fundo_view' %}" class="px-3 py-1 bg-white border-2 border-black shadow-neo-sm hover:bg-neoPink transition-all">Remover Fundo</a>

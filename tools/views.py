@@ -5,6 +5,10 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
 
 
+def home_view(request):
+    return render(request, 'tools/home.html')
+
+
 def converter_view(request):
     if request.method == 'GET':
         return render(request, 'tools/image_converter.html')
