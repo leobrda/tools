@@ -441,3 +441,61 @@ def gerador_favicon_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Erro ao gerar favicons: {str(e)}")
+
+
+def cortar_imagem_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/image_cropper.html')
+
+    if request.method == 'POST':
+        arquivo = request.FILES.get('imagem')
+
+        try:
+            x = float(request.POST.get('x', 0))
+            y = float(request.POST.get('y', 0))
+            largura = float(request.POST.get('width', 0))
+            altura = float(request.POST.get('height', 0))
+        except (TypeError, ValueError):
+            return HttpResponseBadRequest("Coordenadas de corte inválidas.")
+
+        if not arquivo:
+            return HttpResponseBadRequest("Nenhum ficheiro enviado.")
+
+        if largura <= 0 or altura <= 0:
+            return HttpResponseBadRequest("A área de corte deve ter dimensões maiores que zero.")
+
+        try:
+            img = Image.open(arquivo)
+
+            # Define a caixa de corte (left, upper, right, lower)
+            box = (int(x), int(y), int(x + largura), int(y + altura))
+            img_cortada = img.crop(box)
+
+            formato_saida = img.format if img.format in ('JPEG', 'PNG', 'WEBP') else 'JPEG'
+            buffer_saida = io.BytesIO()
+
+            if formato_saida == 'JPEG':
+                if img_cortada.mode != 'RGB':
+                    img_cortada = img_cortada.convert('RGB')
+                img_cortada.save(buffer_saida, format='JPEG', quality=90, optimize=True)
+                mime_type = 'image/jpeg'
+                extensao = 'jpg'
+            elif formato_saida == 'PNG':
+                img_cortada.save(buffer_saida, format='PNG', optimize=True)
+                mime_type = 'image/png'
+                extensao = 'png'
+            else:
+                img_cortada.save(buffer_saida, format='WEBP', quality=90)
+                mime_type = 'image/webp'
+                extensao = 'webp'
+
+            buffer_saida.seek(0)
+            nome_original = arquivo.name.rsplit('.', 1)[0]
+            nome_download = f"{nome_original}_recortado.{extensao}"
+
+            response = HttpResponse(buffer_saida.getvalue(), content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Falha ao cortar imagem: {str(e)}")

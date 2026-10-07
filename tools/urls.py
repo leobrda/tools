@@ -1,5 +1,12 @@
 from django.urls import path
-from .views import home_view, converter_view, comprimir_view, remover_fundo_view, redimensionar_view, imagem_para_pdf_view, gerador_favicon_view
+from .views import (home_view,
+                    converter_view,
+                    comprimir_view,
+                    remover_fundo_view,
+                    redimensionar_view,
+                    imagem_para_pdf_view,
+                    gerador_favicon_view,
+                    cortar_imagem_view,)
 
 urlpatterns = [
     path('', home_view, name='home_view'),
@@ -9,4 +16,5 @@ urlpatterns = [
     path('redimensionar/', redimensionar_view, name='redimensionar_view'),
     path('imagem-para-pdf/', imagem_para_pdf_view, name='imagem_para_pdf_view'),
     path('gerador-favicon/', gerador_favicon_view, name='gerador_favicon_view'),
+    path('cortar/', cortar_imagem_view, name='cortar_imagem_view'),
 ]
