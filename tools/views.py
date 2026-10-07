@@ -1,7 +1,9 @@
 import io
+import numpy as np
 from PIL import Image
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
+
 
 def converter_view(request):
     if request.method == 'GET':
@@ -120,3 +122,51 @@ def comprimir_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Erro ao comprimir imagem: {str(e)}")
+
+
+def remover_fundo_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/background_remover.html')
+
+    if request.method == 'POST':
+        arquivo = request.FILES.get('imagem')
+        tolerancia = int(request.POST.get('tolerancia', 35))
+
+        if not arquivo:
+            return HttpResponseBadRequest("Nenhum ficheiro enviado.")
+
+        try:
+            # 1. Carrega a imagem para memória
+            img = Image.open(arquivo).convert("RGBA")
+            dados = np.array(img)
+
+            # 2. Identifica a cor dos cantos superiores para definir a cor do fundo
+            cor_fundo = dados[0, 0, :3]
+
+            # 3. Calcula a distância cromática de cada píxel em relação ao fundo
+            r, g, b, a = dados[:, :, 0], dados[:, :, 1], dados[:, :, 2], dados[:, :, 3]
+            distancia = np.sqrt(
+                (r.astype(int) - int(cor_fundo[0])) ** 2 +
+                (g.astype(int) - int(cor_fundo[1])) ** 2 +
+                (b.astype(int) - int(cor_fundo[2])) ** 2
+            )
+
+            # 4. Transforma em transparente os píxeis que coincidem com a cor de fundo
+            mascara = distancia < tolerancia
+            dados[mascara, 3] = 0
+
+            # 5. Gera o ficheiro PNG resultante em RAM
+            img_resultado = Image.fromarray(dados)
+            buffer_saida = io.BytesIO()
+            img_resultado.save(buffer_saida, format="PNG", optimize=True)
+            buffer_saida.seek(0)
+
+            nome_original = arquivo.name.rsplit('.', 1)[0]
+            nome_download = f"{nome_original}_sem_fundo.png"
+
+            response = HttpResponse(buffer_saida.getvalue(), content_type="image/png")
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Falha ao remover fundo: {str(e)}")
