@@ -1,5 +1,6 @@
 import io
 import numpy as np
+import zipfile
 from PIL import Image
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -292,3 +293,151 @@ def imagem_para_pdf_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao gerar PDF: {str(e)}")
+
+
+def gerador_favicon_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/favicon_generator.html')
+
+    if request.method == 'POST':
+        arquivo = request.FILES.get('imagem')
+
+        if not arquivo:
+            return HttpResponseBadRequest("Nenhum ficheiro enviado.")
+
+        try:
+            img = Image.open(arquivo)
+
+            # 1. Garantir transparência/RGBA
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+
+            # 2. Fazer recorte central quadrado para não distorcer o ícone
+            largura, altura = img.size
+            lado_minimo = min(largura, altura)
+            esquerda = (largura - lado_minimo) // 2
+            topo = (altura - lado_minimo) // 2
+            img_quadrada = img.crop((esquerda, topo, esquerda + lado_minimo, topo + lado_minimo))
+
+            # 3. Criar arquivo ZIP em memória RAM
+            buffer_zip = io.BytesIO()
+
+            with zipfile.ZipFile(buffer_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                # Gerar o favicon.ico padrão multirresolução (16x16, 32x32, 48x48)
+                buffer_ico = io.BytesIO()
+                img_quadrada.save(
+                    buffer_ico,
+                    format='ICO',
+                    sizes=[(16, 16), (32, 32), (48, 48)]
+                )
+                zip_file.writestr('favicon.ico', buffer_ico.getvalue())
+
+                # Tamanhos individuais em PNG
+                tamanhos_png = {
+                    'favicon-16x16.png': (16, 16),
+                    'favicon-32x32.png': (32, 32),
+                    'apple-touch-icon.png': (180, 180),
+                    'android-chrome-192x192.png': (192, 192),
+                    'android-chrome-512x512.png': (512, 512),
+                }
+
+                for nome_png, dimensao in tamanhos_png.items():
+                    buffer_png = io.BytesIO()
+                    img_redimensionada = img_quadrada.resize(dimensao, Image.Resampling.LANCZOS)
+                    img_redimensionada.save(buffer_png, format='PNG', optimize=True)
+                    zip_file.writestr(nome_png, buffer_png.getvalue())
+
+                # Snippet de tags HTML
+                snippet_tags = (
+                    '<link rel="icon" type="image/x-icon" href="/favicon.ico">\n'
+                    '<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">\n'
+                    '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n'
+                    '<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">\n'
+                    '<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">\n'
+                    '<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">'
+                )
+
+                # Página HTML visual formatada para abrir no navegador
+                pagina_html = f"""<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instruções - Kit de Favicons</title>
+  <style>
+    * {{ box-sizing: border-box; }}
+    body {{
+      font-family: monospace;
+      background-color: #F8F9FA;
+      color: #000;
+      padding: 40px 20px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }}
+    .container {{
+      max-width: 760px;
+      width: 100%;
+      background: #fff;
+      border: 4px solid #000;
+      box-shadow: 8px 8px 0px #000;
+      padding: 32px;
+    }}
+    .badge {{
+      display: inline-block;
+      background: #FFE600;
+      color: #000;
+      font-weight: 900;
+      padding: 6px 12px;
+      border: 2px solid #000;
+      box-shadow: 3px 3px 0 #000;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }}
+    h1 {{
+      font-size: 28px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 0 0 12px 0;
+    }}
+    p {{
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      margin: 8px 0;
+    }}
+    pre {{
+      background: #111;
+      color: #00FF66;
+      border: 3px solid #000;
+      padding: 16px;
+      font-size: 13px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin-top: 16px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">ToolsHub Favicon Kit</div>
+    <h1>Como Utilizar os Ícones</h1>
+    <p><strong>1.</strong> Copie todos os ficheiros de imagem gerados para a pasta pública ou raiz do seu sítio web.</p>
+    <p><strong>2.</strong> Adicione o seguinte bloco de código dentro da secção <code>&lt;head&gt;</code> do seu HTML:</p>
+    <pre><code>{snippet_tags.replace('<', '&lt;').replace('>', '&gt;')}</code></pre>
+  </div>
+</body>
+</html>"""
+
+                zip_file.writestr('instrucoes_html.html', pagina_html)
+                zip_file.writestr('instrucoes.txt', f"COPIE ESTE CODIGO PARA A TAG <head> DO SEU SITE:\n\n{snippet_tags}\n")
+
+            buffer_zip.seek(0)
+            nome_download = "favicon_kit.zip"
+
+            response = HttpResponse(buffer_zip.getvalue(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Erro ao gerar favicons: {str(e)}")
