@@ -57,3 +57,66 @@ def converter_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao processar arquivo: {str(e)}")
+
+
+def comprimir_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/image_compressor.html')
+
+    if request.method == 'POST':
+        arquivo = request.FILES.get('imagem')
+        # Nível de compressão: padrão 60% de qualidade
+        qualidade = int(request.POST.get('qualidade', 60))
+
+        # Trava para garantir valor válido entre 10 e 95
+        qualidade = max(10, min(95, qualidade))
+
+        if not arquivo:
+            return HttpResponseBadRequest("Nenhum arquivo enviado.")
+
+        try:
+            img = Image.open(arquivo)
+            formato_original = img.format if img.format else 'JPEG'
+
+            # Se for formato não suportado diretamente para compressão com lossy, padroniza JPEG
+            if formato_original not in ('JPEG', 'PNG', 'WEBP'):
+                formato_original = 'JPEG'
+
+            buffer_saida = io.BytesIO()
+
+            # Lógica de compressão por formato mantendo o tipo original
+            if formato_original == 'JPEG':
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                img.save(buffer_saida, format='JPEG', quality=qualidade, optimize=True)
+                mime_type = 'image/jpeg'
+                extensao = 'jpg'
+
+            elif formato_original == 'WEBP':
+                img.save(buffer_saida, format='WEBP', quality=qualidade, method=6)
+                mime_type = 'image/webp'
+                extensao = 'webp'
+
+            elif formato_original == 'PNG':
+                # PNG é lossless; reduzimos convertendo para paleta de cores adaptativa (P) se solicitado, ou otimizamos
+                if img.mode != 'RGBA':
+                    img = img.convert('RGB')
+                # Quantização para reduzir drasticamente o peso mantendo PNG
+                if qualidade < 70:
+                    img_otimizada = img.quantize(colors=128, method=2)
+                    img_otimizada.save(buffer_saida, format='PNG', optimize=True)
+                else:
+                    img.save(buffer_saida, format='PNG', optimize=True)
+                mime_type = 'image/png'
+                extensao = 'png'
+
+            buffer_saida.seek(0)
+            nome_original = arquivo.name.rsplit('.', 1)[0]
+            nome_download = f"{nome_original}_comprimido.{extensao}"
+
+            response = HttpResponse(buffer_saida.getvalue(), content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Erro ao comprimir imagem: {str(e)}")
