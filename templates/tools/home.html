@@ -45,7 +45,7 @@
         Catálogo de Ferramentas
       </h2>
       <span class="font-mono text-xs md:text-sm font-bold bg-neoPurple text-white px-3 py-1 border-2 border-black shadow-neo-sm">
-        4 Ativas
+        5 Ativas
       </span>
     </div>
 
@@ -139,6 +139,29 @@
         <div class="pt-6">
           <a href="{% url 'redimensionar_view' %}" class="w-full py-3 bg-neoBlue text-black font-black uppercase text-center border-2 border-black shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all block">
             Redimensionar →
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 5: Imagens para PDF -->
+      <div class="bg-white border-4 border-black p-6 shadow-neo-lg flex flex-col justify-between hover:-translate-y-1 transition-transform">
+        <div class="space-y-4">
+          <div class="flex justify-between items-start">
+            <span class="px-2.5 py-1 bg-neoYellow border-2 border-black shadow-neo-sm font-mono text-xs font-bold uppercase">
+              Documentos
+            </span>
+            <span class="text-2xl">📄</span>
+          </div>
+
+          <h3 class="text-2xl font-black uppercase">Imagens para PDF</h3>
+          <p class="font-mono text-sm text-gray-700">
+            Junte múltiplas fotografias e documentos digitais num único ficheiro PDF pronto para partilha e impressão.
+          </p>
+        </div>
+
+        <div class="pt-6">
+          <a href="{% url 'imagem_para_pdf_view' %}" class="w-full py-3 bg-neoYellow text-black font-black uppercase text-center border-2 border-black shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all block">
+            Aceder ao Conversor PDF →
           </a>
         </div>
       </div>

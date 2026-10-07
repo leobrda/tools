@@ -249,3 +249,46 @@ def redimensionar_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao redimensionar imagem: {str(e)}")
+
+
+def imagem_para_pdf_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/image_to_pdf.html')
+
+    if request.method == 'POST':
+        ficheiros = request.FILES.getlist('imagens')
+
+        if not ficheiros:
+            return HttpResponseBadRequest("Nenhum ficheiro enviado.")
+
+        try:
+            lista_imagens = []
+
+            for f in ficheiros:
+                img = Image.open(f)
+                # Conversão obrigatória para RGB para suporte a PDF no Pillow
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                lista_imagens.append(img)
+
+            buffer_saida = io.BytesIO()
+            primeira_imagem = lista_imagens[0]
+            restantes = lista_imagens[1:] if len(lista_imagens) > 1 else []
+
+            # Compilação das páginas no buffer de memória
+            primeira_imagem.save(
+                buffer_saida,
+                format='PDF',
+                save_all=True,
+                append_images=restantes
+            )
+
+            buffer_saida.seek(0)
+            nome_download = "documento_convertido.pdf"
+
+            response = HttpResponse(buffer_saida.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Falha ao gerar PDF: {str(e)}")
