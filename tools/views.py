@@ -170,3 +170,78 @@ def remover_fundo_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao remover fundo: {str(e)}")
+
+
+def redimensionar_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/image_resizer.html')
+
+    if request.method == 'POST':
+        arquivo = request.FILES.get('imagem')
+        largura = request.POST.get('largura')
+        altura = request.POST.get('altura')
+        manter_proporcao = request.POST.get('manter_proporcao') == 'on'
+
+        if not arquivo:
+            return HttpResponseBadRequest("Nenhum ficheiro enviado.")
+
+        try:
+            largura = int(largura) if largura else None
+            altura = int(altura) if altura else None
+        except ValueError:
+            return HttpResponseBadRequest("Valores de dimensões inválidos.")
+
+        if not largura and not altura:
+            return HttpResponseBadRequest("Indique pelo menos uma dimensão (largura ou altura).")
+
+        try:
+            img = Image.open(arquivo)
+            largura_orig, altura_orig = img.size
+
+            # Cálculo de proporção caso apenas uma dimensão seja indicada ou a caixa esteja ativa
+            if manter_proporcao:
+                if largura and not altura:
+                    proporcao = largura / float(largura_orig)
+                    altura = int(float(altura_orig) * float(proporcao))
+                elif altura and not largura:
+                    proporcao = altura / float(altura_orig)
+                    largura = int(float(largura_orig) * float(proporcao))
+                elif largura and altura:
+                    proporcao = min(largura / float(largura_orig), altura / float(altura_orig))
+                    largura = int(float(largura_orig) * float(proporcao))
+                    altura = int(float(altura_orig) * float(proporcao))
+            else:
+                largura = largura or largura_orig
+                altura = altura or altura_orig
+
+            # Redimensionamento com filtro Lanczos de alta qualidade
+            img_redimensionada = img.resize((largura, altura), Image.Resampling.LANCZOS)
+
+            formato_saida = img.format if img.format in ('JPEG', 'PNG', 'WEBP') else 'JPEG'
+            buffer_saida = io.BytesIO()
+
+            if formato_saida == 'JPEG':
+                if img_redimensionada.mode != 'RGB':
+                    img_redimensionada = img_redimensionada.convert('RGB')
+                img_redimensionada.save(buffer_saida, format='JPEG', quality=90, optimize=True)
+                mime_type = 'image/jpeg'
+                extensao = 'jpg'
+            elif formato_saida == 'PNG':
+                img_redimensionada.save(buffer_saida, format='PNG', optimize=True)
+                mime_type = 'image/png'
+                extensao = 'png'
+            else:
+                img_redimensionada.save(buffer_saida, format='WEBP', quality=90)
+                mime_type = 'image/webp'
+                extensao = 'webp'
+
+            buffer_saida.seek(0)
+            nome_original = arquivo.name.rsplit('.', 1)[0]
+            nome_download = f"{nome_original}_{largura}x{altura}.{extensao}"
+
+            response = HttpResponse(buffer_saida.getvalue(), content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Falha ao redimensionar imagem: {str(e)}")
