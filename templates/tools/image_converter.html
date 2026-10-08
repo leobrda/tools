@@ -1,106 +1,69 @@
 {% extends 'base.html' %}
 
-{% block title %}Conversor de Imagens Grátis - Neo-Brutalist UI{% endblock %}
+{% block title %}Converter Imagem Grátis - ToolsHub{% endblock %}
 
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-  <!-- Coluna da Esquerda: Área de Ação -->
-  <div class="lg:col-span-8 bg-white border-4 border-black p-6 shadow-neo-lg">
-    
-    <div class="inline-block px-3 py-1 bg-neoYellow border-2 border-black shadow-neo-sm font-mono text-xs font-bold uppercase mb-3">
-      Ferramenta de Imagem
+  <div class="lg:col-span-8 bg-white dark:bg-darkCard border-4 border-black dark:border-white p-6 shadow-neo-lg dark:shadow-neo-dark-lg transition-colors">
+    <div class="inline-block px-3 py-1 bg-neoGreen text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm font-mono text-xs font-bold uppercase mb-3">
+      Conversão Universal
     </div>
 
-    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-2">
-      Converter Imagem
+    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-2 text-black dark:text-white">
+      Conversor de Imagens
     </h1>
-    <p class="font-mono text-sm text-gray-700 mb-6">
-      Converta entre PNG, JPG e WEBP instantaneamente. Arquivos processados em memória volátil.
+    <p class="font-mono text-sm text-gray-700 dark:text-zinc-300 mb-6">
+      Converta fotos instantaneamente entre PNG, JPG e WEBP em memória RAM com preservação inteligente de canais alfa.
     </p>
 
-    <!-- Formulário -->
-    <form id="convertForm" action="{% url 'converter_view' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form action="{% url 'converter_view' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
-
-      <!-- Drag & Drop Zone -->
-      <div id="dropZone" class="border-4 border-dashed border-black bg-[#FAF9F6] p-8 text-center cursor-pointer transition-all hover:bg-yellow-50 relative">
-        <input type="file" name="imagem" id="fileInput" accept="image/png,image/jpeg,image/webp,image/bmp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-        
+      <div id="dropZone" class="border-4 border-dashed border-black dark:border-zinc-500 bg-[#FAF9F6] dark:bg-zinc-800/50 p-8 text-center cursor-pointer transition-all hover:bg-emerald-50 dark:hover:bg-zinc-800 relative">
+        <input type="file" name="imagem" id="fileInput" accept="image/png,image/jpeg,image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
         <div class="space-y-2 pointer-events-none">
-          <div class="w-16 h-16 mx-auto bg-neoGreen border-2 border-black shadow-neo-sm flex items-center justify-center font-black text-2xl">
-            ↑
+          <div class="w-16 h-16 mx-auto bg-neoGreen text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm flex items-center justify-center font-black text-2xl">
+            🔄
           </div>
-          <p class="text-base font-bold uppercase" id="dropText">Arraste sua imagem ou clique para selecionar</p>
-          <p class="font-mono text-xs text-gray-500">PNG, JPG, WEBP até 15MB</p>
+          <p class="text-base font-bold uppercase text-black dark:text-white">Clique ou arraste a imagem aqui</p>
+          <p class="font-mono text-xs text-gray-500 dark:text-zinc-400">PNG, JPG ou WEBP até 15MB</p>
         </div>
       </div>
 
-      <!-- Preview e Seleção de Formato (aparece após selecionar) -->
-      <div id="fileInfo" class="hidden p-4 bg-gray-100 border-2 border-black flex items-center justify-between">
-        <div class="font-mono text-xs font-bold truncate pr-4">
-          <span class="text-gray-500">Arquivo:</span> <span id="fileNameDisplay" class="text-black"></span>
-        </div>
-        <button type="button" id="removeFileBtn" class="px-2 py-1 bg-neoPink border-2 border-black shadow-neo-sm text-xs font-bold hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">
-          Remover
-        </button>
+      <div id="fileInfo" class="hidden p-4 bg-gray-100 dark:bg-zinc-800 border-2 border-black dark:border-white flex items-center justify-between">
+        <span id="fileNameDisplay" class="font-mono text-xs font-bold truncate pr-4 text-black dark:text-white"></span>
+        <button type="button" id="removeFileBtn" class="px-2 py-1 bg-neoPink text-black border-2 border-black shadow-neo-sm text-xs font-bold">Remover</button>
       </div>
 
-      <!-- Seletor de Formato -->
-      <div>
-        <label class="block font-black text-sm uppercase tracking-wide mb-2">
-          Converter para qual formato?
-        </label>
-        <div class="grid grid-cols-3 gap-3">
-          <label class="cursor-pointer">
-            <input type="radio" name="formato" value="WEBP" class="peer sr-only" checked>
-            <div class="p-3 text-center border-2 border-black font-mono font-bold peer-checked:bg-neoGreen peer-checked:shadow-neo transition-all bg-white hover:bg-gray-50">
-              WEBP
-            </div>
-          </label>
-
-          <label class="cursor-pointer">
-            <input type="radio" name="formato" value="JPEG" class="peer sr-only">
-            <div class="p-3 text-center border-2 border-black font-mono font-bold peer-checked:bg-neoYellow peer-checked:shadow-neo transition-all bg-white hover:bg-gray-50">
-              JPG / JPEG
-            </div>
-          </label>
-
-          <label class="cursor-pointer">
-            <input type="radio" name="formato" value="PNG" class="peer sr-only">
-            <div class="p-3 text-center border-2 border-black font-mono font-bold peer-checked:bg-neoPink peer-checked:shadow-neo transition-all bg-white hover:bg-gray-50">
-              PNG
-            </div>
-          </label>
-        </div>
+      <div class="p-4 border-2 border-black dark:border-white bg-[#F8F9FA] dark:bg-zinc-800/80 space-y-2">
+        <label class="block font-mono font-bold text-xs uppercase text-gray-700 dark:text-zinc-300">Formato de Saída:</label>
+        <select name="formato" class="w-full p-2.5 border-2 border-black dark:border-white font-mono font-bold text-xs bg-white dark:bg-zinc-900 text-black dark:text-white cursor-pointer">
+          <option value="jpeg">JPG (Mais leve / Sem transparência)</option>
+          <option value="png" selected>PNG (Com canal alfa transparente)</option>
+          <option value="webp">WEBP (Moda Web / Ultra compactado)</option>
+        </select>
       </div>
 
-      <!-- Botão de Ação -->
-      <button type="submit" id="submitBtn" class="w-full py-4 bg-neoGreen text-black font-black uppercase text-lg border-4 border-black shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2">
-        <span>Processar e Baixar</span>
-        <span class="font-mono">→</span>
+      <button type="submit" class="w-full py-4 bg-neoGreen text-black font-black uppercase text-lg border-4 border-black dark:border-white shadow-neo dark:shadow-neo-dark hover:translate-x-1 hover:translate-y-1 hover:shadow-none dark:hover:shadow-none transition-all flex items-center justify-center gap-2">
+        <span>Converter e Descarregar</span>
+        <span class="font-mono">↓</span>
       </button>
     </form>
   </div>
 
-  <!-- Coluna da Direita: Card Estilo Terminal / Info -->
   <div class="lg:col-span-4 space-y-6">
-    <div class="bg-neoPink border-4 border-black p-5 shadow-neo-lg">
-      <h3 class="font-black text-xl uppercase mb-2">Privacidade Total</h3>
+    <div class="bg-neoYellow text-black border-4 border-black dark:border-white p-5 shadow-neo-lg dark:shadow-neo-dark-lg">
+      <h3 class="font-black text-xl uppercase mb-2">Canal Alfa Inteligente</h3>
       <p class="text-sm font-medium leading-relaxed">
-        Não temos banco de dados de arquivos. O Django processa o byte buffer diretamente na RAM e devolve via streaming no mesmo segundo.
+        Ao converter PNG para JPG, transparências recebem automaticamente fundo neutro limpo, evitando ruídos e artefatos pretos.
       </p>
     </div>
-
-    <!-- Espaço reservado para o Banner do Google AdSense -->
-    <div class="bg-white border-4 border-black p-4 shadow-neo text-center">
-      <span class="font-mono text-xs font-bold text-gray-400 block mb-2">[ ESPAÇO PUBLICITÁRIO ]</span>
-      <div class="w-full h-64 bg-gray-100 border-2 border-dashed border-gray-400 flex items-center justify-center font-mono text-xs text-gray-500">
+    <div class="bg-white dark:bg-darkCard border-4 border-black dark:border-white p-4 shadow-neo dark:shadow-neo-dark text-center">
+      <span class="font-mono text-xs font-bold text-gray-400 dark:text-zinc-500 block mb-2">[ ESPAÇO PUBLICITÁRIO ]</span>
+      <div class="w-full h-64 bg-gray-100 dark:bg-zinc-800 border-2 border-dashed border-gray-400 dark:border-zinc-600 flex items-center justify-center font-mono text-xs text-gray-500 dark:text-zinc-400">
         Banner AdSense 300x250
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -112,16 +75,14 @@
 
   fileInput.addEventListener('change', () => {
     if (fileInput.files.length > 0) {
-      fileNameDisplay.textContent = fileInput.files[0].name;
+      fileNameDisplay.textContent = `Ficheiro: ${fileInput.files[0].name}`;
       fileInfo.classList.remove('hidden');
-      dropZone.classList.add('bg-green-50', 'border-neoGreen');
     }
   });
 
   removeFileBtn.addEventListener('click', () => {
     fileInput.value = '';
     fileInfo.classList.add('hidden');
-    dropZone.classList.remove('bg-green-50', 'border-neoGreen');
   });
 </script>
 {% endblock %}

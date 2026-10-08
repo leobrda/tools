@@ -4,74 +4,60 @@
 
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-  <!-- Painel Principal -->
-  <div class="lg:col-span-8 bg-white border-4 border-black p-6 shadow-neo-lg">
-
-    <div class="inline-block px-3 py-1 bg-neoYellow border-2 border-black shadow-neo-sm font-mono text-xs font-bold uppercase mb-3">
+  <div class="lg:col-span-8 bg-white dark:bg-darkCard border-4 border-black dark:border-white p-6 shadow-neo-lg dark:shadow-neo-dark-lg transition-colors">
+    <div class="inline-block px-3 py-1 bg-neoYellow text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm font-mono text-xs font-bold uppercase mb-3">
       Documentos &amp; Exportação
     </div>
 
-    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-2">
+    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-2 text-black dark:text-white">
       Imagens para PDF
     </h1>
-    <p class="font-mono text-sm text-gray-700 mb-6">
-      Junte uma ou várias imagens num único ficheiro PDF pronto a imprimir ou partilhar. Sem marcas de água e processado em RAM.
+    <p class="font-mono text-sm text-gray-700 dark:text-zinc-300 mb-6">
+      Junte uma ou várias imagens num único documento PDF pronto a imprimir ou partilhar. Sem marcas de água e processado em RAM.
     </p>
 
     <form action="{% url 'imagem_para_pdf_view' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
-
-      <!-- Drop Zone com suporte a múltiplos ficheiros -->
-      <div id="dropZone" class="border-4 border-dashed border-black bg-[#FAF9F6] p-8 text-center cursor-pointer transition-all hover:bg-yellow-50 relative">
+      <div id="dropZone" class="border-4 border-dashed border-black dark:border-zinc-500 bg-[#FAF9F6] dark:bg-zinc-800/50 p-8 text-center cursor-pointer transition-all hover:bg-yellow-50 dark:hover:bg-zinc-800 relative">
         <input type="file" name="imagens" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-
         <div class="space-y-2 pointer-events-none">
-          <div class="w-16 h-16 mx-auto bg-neoYellow border-2 border-black shadow-neo-sm flex items-center justify-center font-black text-2xl">
+          <div class="w-16 h-16 mx-auto bg-neoYellow text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm flex items-center justify-center font-black text-2xl">
             📄
           </div>
-          <p class="text-base font-bold uppercase">Clique ou arraste as imagens aqui</p>
-          <p class="font-mono text-xs text-gray-500">Pode selecionar múltiplos ficheiros (JPG, PNG, WEBP)</p>
+          <p class="text-base font-bold uppercase text-black dark:text-white">Clique ou arraste as imagens aqui</p>
+          <p class="font-mono text-xs text-gray-500 dark:text-zinc-400">Pode selecionar múltiplos ficheiros (JPG, PNG, WEBP)</p>
         </div>
       </div>
 
-      <!-- Lista de Ficheiros Selecionados -->
-      <div id="fileInfo" class="hidden p-4 bg-gray-100 border-2 border-black space-y-3">
-        <div class="flex items-center justify-between font-mono text-xs font-bold">
-          <div><span class="text-gray-500">Ficheiros selecionados:</span> <span id="fileCountDisplay" class="text-black">0</span></div>
-          <button type="button" id="clearFilesBtn" class="px-2 py-1 bg-neoPink border-2 border-black shadow-neo-sm text-xs font-bold hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">
-            Limpar
-          </button>
+      <div id="fileInfo" class="hidden p-4 bg-gray-100 dark:bg-zinc-800 border-2 border-black dark:border-white space-y-3">
+        <div class="flex items-center justify-between font-mono text-xs font-bold text-black dark:text-white">
+          <div><span class="text-gray-500 dark:text-zinc-400">Ficheiros:</span> <span id="fileCountDisplay">0</span></div>
+          <button type="button" id="clearFilesBtn" class="px-2 py-1 bg-neoPink text-black border-2 border-black shadow-neo-sm text-xs font-bold">Limpar</button>
         </div>
-        <ul id="fileListDisplay" class="font-mono text-xs text-gray-700 list-disc list-inside max-h-36 overflow-y-auto space-y-1"></ul>
+        <ul id="fileListDisplay" class="font-mono text-xs text-gray-700 dark:text-zinc-300 list-disc list-inside max-h-36 overflow-y-auto space-y-1"></ul>
       </div>
 
-      <!-- Botão Submit -->
-      <button type="submit" class="w-full py-4 bg-neoYellow text-black font-black uppercase text-lg border-4 border-black shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2">
+      <button type="submit" class="w-full py-4 bg-neoYellow text-black font-black uppercase text-lg border-4 border-black dark:border-white shadow-neo dark:shadow-neo-dark hover:translate-x-1 hover:translate-y-1 hover:shadow-none dark:hover:shadow-none transition-all flex items-center justify-center gap-2">
         <span>Compilar e Descarregar PDF</span>
         <span class="font-mono">↓</span>
       </button>
     </form>
-
   </div>
 
-  <!-- Barra Lateral -->
   <div class="lg:col-span-4 space-y-6">
-    <div class="bg-neoPink text-black border-4 border-black p-5 shadow-neo-lg">
+    <div class="bg-neoPink text-black border-4 border-black dark:border-white p-5 shadow-neo-lg dark:shadow-neo-dark-lg">
       <h3 class="font-black text-xl uppercase mb-2">Sem Limites de Páginas</h3>
       <p class="text-sm font-medium leading-relaxed">
-        Cada imagem submetida torna-se numa página independente dentro do documento final, respeitando a resolução e proporções originais.
+        Cada imagem submetida torna-se numa página independente dentro do documento final, respeitando a resolução original.
       </p>
     </div>
-
-    <div class="bg-white border-4 border-black p-4 shadow-neo text-center">
-      <span class="font-mono text-xs font-bold text-gray-400 block mb-2">[ ESPAÇO PUBLICITÁRIO ]</span>
-      <div class="w-full h-64 bg-gray-100 border-2 border-dashed border-gray-400 flex items-center justify-center font-mono text-xs text-gray-500">
+    <div class="bg-white dark:bg-darkCard border-4 border-black dark:border-white p-4 shadow-neo dark:shadow-neo-dark text-center">
+      <span class="font-mono text-xs font-bold text-gray-400 dark:text-zinc-500 block mb-2">[ ESPAÇO PUBLICITÁRIO ]</span>
+      <div class="w-full h-64 bg-gray-100 dark:bg-zinc-800 border-2 border-dashed border-gray-400 dark:border-zinc-600 flex items-center justify-center font-mono text-xs text-gray-500 dark:text-zinc-400">
         Banner AdSense 300x250
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -86,22 +72,18 @@
     if (fileInput.files.length > 0) {
       fileCountDisplay.textContent = fileInput.files.length;
       fileListDisplay.innerHTML = '';
-
       Array.from(fileInput.files).forEach((f) => {
         const li = document.createElement('li');
         li.textContent = `${f.name} (${Math.round(f.size / 1024)} KB)`;
         fileListDisplay.appendChild(li);
       });
-
       fileInfo.classList.remove('hidden');
-      dropZone.classList.add('bg-yellow-50', 'border-neoYellow');
     }
   });
 
   clearFilesBtn.addEventListener('click', () => {
     fileInput.value = '';
     fileInfo.classList.add('hidden');
-    dropZone.classList.remove('bg-yellow-50', 'border-neoYellow');
     fileListDisplay.innerHTML = '';
   });
 </script>

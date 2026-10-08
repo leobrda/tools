@@ -4,118 +4,96 @@
 
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-  <!-- Painel Principal -->
-  <div class="lg:col-span-8 bg-white border-4 border-black p-6 shadow-neo-lg">
-
-    <div class="inline-block px-3 py-1 bg-neoYellow border-2 border-black shadow-neo-sm font-mono text-xs font-bold uppercase mb-3">
+  <div class="lg:col-span-8 bg-white dark:bg-darkCard border-4 border-black dark:border-white p-6 shadow-neo-lg dark:shadow-neo-dark-lg transition-colors">
+    <div class="inline-block px-3 py-1 bg-neoYellow text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm font-mono text-xs font-bold uppercase mb-3">
       Extração &amp; Documentos
     </div>
 
-    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-2">
+    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-2 text-black dark:text-white">
       PDF para Imagem
     </h1>
-    <p class="font-mono text-sm text-gray-700 mb-6">
-      Converta cada página do seu documento PDF em imagens de alta definição (JPG ou PNG). Páginas múltiplas são organizadas automaticamente num pacote ZIP.
+    <p class="font-mono text-sm text-gray-700 dark:text-zinc-300 mb-6">
+      Converta cada página do seu PDF em imagens de alta definição (JPG ou PNG). Documentos com várias páginas são compilados automaticamente num ZIP.
     </p>
 
     <form action="{% url 'pdf_para_imagem_view' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
-
-      <!-- Drop Zone -->
-      <div id="dropZone" class="border-4 border-dashed border-black bg-[#FAF9F6] p-8 text-center cursor-pointer transition-all hover:bg-yellow-50 relative">
+      <div id="dropZone" class="border-4 border-dashed border-black dark:border-zinc-500 bg-[#FAF9F6] dark:bg-zinc-800/50 p-8 text-center cursor-pointer transition-all hover:bg-yellow-50 dark:hover:bg-zinc-800 relative">
         <input type="file" name="pdf" id="fileInput" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-
         <div class="space-y-2 pointer-events-none">
-          <div class="w-16 h-16 mx-auto bg-neoYellow border-2 border-black shadow-neo-sm flex items-center justify-center font-black text-2xl">
+          <div class="w-16 h-16 mx-auto bg-neoYellow text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm flex items-center justify-center font-black text-2xl">
             📑
           </div>
-          <p class="text-base font-bold uppercase">Clique ou arraste o ficheiro PDF aqui</p>
-          <p class="font-mono text-xs text-gray-500">Documentos PDF até 25MB</p>
+          <p class="text-base font-bold uppercase text-black dark:text-white">Clique ou arraste o PDF aqui</p>
+          <p class="font-mono text-xs text-gray-500 dark:text-zinc-400">Documentos PDF até 25MB</p>
         </div>
       </div>
 
-      <!-- Ficheiro Selecionado -->
-      <div id="fileInfo" class="hidden p-4 bg-gray-100 border-2 border-black flex items-center justify-between">
-        <div class="font-mono text-xs font-bold truncate pr-4">
-          <span class="text-gray-500">Ficheiro:</span> <span id="fileNameDisplay" class="text-black"></span>
-        </div>
-        <button type="button" id="removeFileBtn" class="px-2 py-1 bg-neoPink border-2 border-black shadow-neo-sm text-xs font-bold hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">
-          Remover
-        </button>
+      <div id="fileInfo" class="hidden p-4 bg-gray-100 dark:bg-zinc-800 border-2 border-black dark:border-white flex items-center justify-between">
+        <span id="fileNameDisplay" class="font-mono text-xs font-bold truncate pr-4 text-black dark:text-white"></span>
+        <button type="button" id="removeFileBtn" class="px-2 py-1 bg-neoPink text-black border-2 border-black shadow-neo-sm text-xs font-bold">Remover</button>
       </div>
 
-      <!-- Opções de Formato e Resolução -->
-      <div class="p-5 border-2 border-black bg-[#F8F9FA] space-y-4">
-        <span class="block font-mono font-bold text-xs uppercase text-gray-700">Configurações de Saída:</span>
-
+      <div class="p-5 border-2 border-black dark:border-white bg-[#F8F9FA] dark:bg-zinc-800/80 space-y-4">
+        <span class="block font-mono font-bold text-xs uppercase text-gray-700 dark:text-zinc-300">Configurações de Saída:</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block font-mono font-bold text-xs uppercase mb-1">Formato da Imagem:</label>
-            <select name="formato" class="w-full p-2.5 border-2 border-black font-mono font-bold text-xs bg-white cursor-pointer">
+            <label class="block font-mono font-bold text-xs uppercase mb-1 text-gray-700 dark:text-zinc-300">Formato:</label>
+            <select name="formato" class="w-full p-2.5 border-2 border-black dark:border-white font-mono font-bold text-xs bg-white dark:bg-zinc-900 text-black dark:text-white cursor-pointer">
               <option value="jpeg" selected>JPG (Mais leve / Recomendado)</option>
               <option value="png">PNG (Máxima Fidelidade)</option>
             </select>
           </div>
-
           <div>
-            <label class="block font-mono font-bold text-xs uppercase mb-1">Resolução / Nitidez:</label>
-            <select name="qualidade" class="w-full p-2.5 border-2 border-black font-mono font-bold text-xs bg-white cursor-pointer">
-              <option value="2" selected>Alta Resolução (2x / ~150 DPI)</option>
-              <option value="3">Ultra HD (3x / ~300 DPI para impressão)</option>
-              <option value="1">Padrão Rápido (1x / ~72 DPI para web)</option>
+            <label class="block font-mono font-bold text-xs uppercase mb-1 text-gray-700 dark:text-zinc-300">Resolução:</label>
+            <select name="qualidade" class="w-full p-2.5 border-2 border-black dark:border-white font-mono font-bold text-xs bg-white dark:bg-zinc-900 text-black dark:text-white cursor-pointer">
+              <option value="2" selected>Alta Resolução (~150 DPI)</option>
+              <option value="3">Ultra HD (~300 DPI)</option>
+              <option value="1">Padrão Rápido (~72 DPI)</option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- Botão Submit -->
-      <button type="submit" class="w-full py-4 bg-neoYellow text-black font-black uppercase text-lg border-4 border-black shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2">
+      <button type="submit" class="w-full py-4 bg-neoYellow text-black font-black uppercase text-lg border-4 border-black dark:border-white shadow-neo dark:shadow-neo-dark hover:translate-x-1 hover:translate-y-1 hover:shadow-none dark:hover:shadow-none transition-all flex items-center justify-center gap-2">
         <span>Extrair Páginas e Descarregar</span>
         <span class="font-mono">↓</span>
       </button>
     </form>
-
   </div>
 
-  <!-- Barra Lateral -->
   <div class="lg:col-span-4 space-y-6">
-    <div class="bg-neoGreen border-4 border-black p-5 shadow-neo-lg">
+    <div class="bg-neoGreen text-black border-4 border-black dark:border-white p-5 shadow-neo-lg dark:shadow-neo-dark-lg">
       <h3 class="font-black text-xl uppercase mb-2">Motor PDFium</h3>
       <p class="text-sm font-medium leading-relaxed">
-        Utiliza o motor gráfico de renderização de código aberto da Google para renderizar vetores, gráficos e fontes complexas com total precisão.
+        Renderização nativa de vetores e tipografias complexas direto em RAM sem conversões intermediárias em disco.
       </p>
     </div>
-
-    <div class="bg-white border-4 border-black p-4 shadow-neo text-center">
-      <span class="font-mono text-xs font-bold text-gray-400 block mb-2">[ ESPAÇO PUBLICITÁRIO ]</span>
-      <div class="w-full h-64 bg-gray-100 border-2 border-dashed border-gray-400 flex items-center justify-center font-mono text-xs text-gray-500">
+    <div class="bg-white dark:bg-darkCard border-4 border-black dark:border-white p-4 shadow-neo dark:shadow-neo-dark text-center">
+      <span class="font-mono text-xs font-bold text-gray-400 dark:text-zinc-500 block mb-2">[ ESPAÇO PUBLICITÁRIO ]</span>
+      <div class="w-full h-64 bg-gray-100 dark:bg-zinc-800 border-2 border-dashed border-gray-400 dark:border-zinc-600 flex items-center justify-center font-mono text-xs text-gray-500 dark:text-zinc-400">
         Banner AdSense 300x250
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
   const fileInput = document.getElementById('fileInput');
-  const dropZone = document.getElementById('dropZone');
   const fileInfo = document.getElementById('fileInfo');
   const fileNameDisplay = document.getElementById('fileNameDisplay');
   const removeFileBtn = document.getElementById('removeFileBtn');
 
   fileInput.addEventListener('change', () => {
     if (fileInput.files.length > 0) {
-      fileNameDisplay.textContent = fileInput.files[0].name;
+      fileNameDisplay.textContent = `Ficheiro: ${fileInput.files[0].name}`;
       fileInfo.classList.remove('hidden');
-      dropZone.classList.add('bg-yellow-50', 'border-neoYellow');
     }
   });
 
   removeFileBtn.addEventListener('click', () => {
     fileInput.value = '';
     fileInfo.classList.add('hidden');
-    dropZone.classList.remove('bg-yellow-50', 'border-neoYellow');
   });
 </script>
 {% endblock %}
