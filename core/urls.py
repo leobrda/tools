@@ -21,4 +21,12 @@ urlpatterns = [
     path('', include('tools.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', robots_txt, name='robots_txt'),
+    path(
+        "ads.txt",
+        lambda r: HttpResponse(
+            "google.com, pub-1920791853485408, DIRECT, f08c47fec0942fa0\n",
+            content_type="text/plain",
+        ),
+        name="ads_txt",
+    ),
 ]
