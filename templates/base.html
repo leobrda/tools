@@ -169,14 +169,18 @@
   </main>
 
   <!-- Rodapé Neo-brutalista -->
-  <footer class="border-t-4 border-black dark:border-white bg-white dark:bg-darkCard py-6 mt-12 transition-colors">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="font-mono text-xs text-gray-700 dark:text-zinc-300">
-        <strong>ToolsHub</strong> &copy; 2026 - Zero ficheiros em disco. Processamento em memória RAM.
+  <footer class="mt-16 border-t-4 border-black dark:border-white bg-white dark:bg-darkCard p-6 transition-colors">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-xs">
+      <div class="text-black dark:text-white font-bold">
+        © 2026 ToolsHub. Processamento volátil em RAM &amp; Código Aberto.
       </div>
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-3 h-3 bg-neoGreen border border-black dark:border-white rounded-full animate-pulse"></span>
-        <span class="font-mono text-xs font-bold uppercase text-black dark:text-white">Modo Online Ativo</span>
+      <div class="flex items-center gap-6">
+        <a href="{% url 'privacidade_view' %}" class="text-gray-700 dark:text-zinc-300 hover:text-black dark:hover:text-white underline font-bold">
+          Política de Privacidade
+        </a>
+        <a href="{% url 'termos_view' %}" class="text-gray-700 dark:text-zinc-300 hover:text-black dark:hover:text-white underline font-bold">
+          Termos de Uso
+        </a>
       </div>
     </div>
   </footer>

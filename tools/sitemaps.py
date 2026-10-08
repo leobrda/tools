@@ -17,6 +17,8 @@ class StaticViewSitemap(Sitemap):
             'gerador_favicon_view',
             'cortar_imagem_view',
             'marca_dagua_view',
+            'privacidade_view',
+            'termos_view',
         ]
 
     def location(self, item):

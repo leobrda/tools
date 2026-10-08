@@ -702,3 +702,10 @@ def pdf_para_imagem_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao processar PDF: {str(e)}")
+
+
+def privacidade_view(request):
+    return render(request, 'tools/privacidade.html')
+
+def termos_view(request):
+    return render(request, 'tools/termos.html')

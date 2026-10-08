@@ -8,7 +8,9 @@ from .views import (home_view,
                     gerador_favicon_view,
                     cortar_imagem_view,
                     marca_dagua_view,
-                    pdf_para_imagem_view,)
+                    pdf_para_imagem_view,
+                    privacidade_view,
+                    termos_view,)
 
 urlpatterns = [
     path('', home_view, name='home_view'),
@@ -21,4 +23,6 @@ urlpatterns = [
     path('cortar/', cortar_imagem_view, name='cortar_imagem_view'),
     path('marca-dagua/', marca_dagua_view, name='marca_dagua_view'),
     path('pdf-para-imagem/', pdf_para_imagem_view, name='pdf_para_imagem_view'),
+    path('privacidade/', privacidade_view, name='privacidade_view'),
+    path('termos/', termos_view, name='termos_view'),
 ]

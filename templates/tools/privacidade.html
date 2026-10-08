@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Política de Privacidade - ToolsHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+  <div class="bg-white dark:bg-darkCard border-4 border-black dark:border-white p-6 md:p-10 shadow-neo-lg dark:shadow-neo-dark-lg transition-colors">
+    <div class="inline-block px-3 py-1 bg-neoGreen text-black border-2 border-black dark:border-white shadow-neo-sm dark:shadow-neo-dark-sm font-mono text-xs font-bold uppercase mb-4">
+      Privacidade e Proteção de Dados
+    </div>
+
+    <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-4 text-black dark:text-white">
+      Política de Privacidade
+    </h1>
+    <p class="font-mono text-xs text-gray-500 dark:text-zinc-400 mb-8">
+      Última atualização: Outubro de 2026
+    </p>
+
+    <div class="space-y-6 font-mono text-sm text-gray-800 dark:text-zinc-300 leading-relaxed">
+      <section class="space-y-2">
+        <h2 class="text-xl font-black uppercase text-black dark:text-white border-b-2 border-black dark:border-white pb-1">
+          1. Filosofia de Armazenamento Zero (RAM-Only)
+        </h2>
+        <p>
+          O <strong>ToolsHub</strong> opera sob uma política estrita de privacidade por design. Qualquer arquivo (imagem, PDF ou gráfico) enviado para manipulação não é salvo de forma persistente em nenhum disco rígido, banco de dados ou serviço de armazenamento em nuvem (S3/Cloud Storage).
+        </p>
+        <p>
+          Os dados são processados exclusivamente em buffers voláteis de memória RAM durante a fração de segundo necessária para aplicar a transformação solicitada e são imediatamente destruídos após o envio da resposta HTTP de download.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-xl font-black uppercase text-black dark:text-white border-b-2 border-black dark:border-white pb-1">
+          2. Dados Pessoais e Cadastros
+        </h2>
+        <p>
+          Nós não exigimos nem coletamos cadastros, endereços de e-mail, nomes, senhas ou dados sensíveis para o uso de qualquer ferramenta do catálogo. O acesso a todas as utilidades é livre e desimpedido.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-xl font-black uppercase text-black dark:text-white border-b-2 border-black dark:border-white pb-1">
+          3. Cookies e Publicidade de Terceiros (Google AdSense)
+        </h2>
+        <p>
+          Podemos utilizar fornecedores terceiros, incluindo o Google, que usam cookies para veicular anúncios com base nas visitas anteriores dos usuários a este ou a outros sites na Internet.
+        </p>
+        <p>
+          O uso de cookies de publicidade permite ao Google e aos parceiros dele veicular anúncios com base nas visitas aos seus sites e/ou a outros sites na Internet. Os usuários podem desativar a publicidade personalizada acessando as <a href="https://www.google.com/settings/ads" target="_blank" class="underline font-bold text-black dark:text-neoYellow">Configurações de anúncios</a> do Google.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-xl font-black uppercase text-black dark:text-white border-b-2 border-black dark:border-white pb-1">
+          4. Armazenamento Local (localStorage)
+        </h2>
+        <p>
+          O site utiliza o armazenamento local do seu navegador (<code>localStorage</code>) exclusivamente para lembrar a sua preferência de interface (tema claro ou escuro). Nenhuma informação de identificação pessoal ou rastreamento comportamental é gravada nesse armazenamento.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-xl font-black uppercase text-black dark:text-white border-b-2 border-black dark:border-white pb-1">
+          5. Contato
+        </h2>
+        <p>
+          Para dúvidas, sugestões ou questões técnicas sobre a nossa infraestrutura e política de privacidade, você pode entrar em contato através do canal oficial do desenvolvedor.
+        </p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
