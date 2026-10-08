@@ -2,6 +2,7 @@ import io
 import numpy as np
 import zipfile
 from PIL import Image, ImageDraw, ImageFont
+import pypdfium2 as pdfium
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
 
@@ -633,3 +634,71 @@ def marca_dagua_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao aplicar marca d'água: {str(e)}")
+
+
+def pdf_para_imagem_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/pdf_to_image.html')
+
+    if request.method == 'POST':
+        arquivo = request.FILES.get('pdf')
+        formato_saida = request.POST.get('formato', 'jpeg').upper()  # 'JPEG' ou 'PNG'
+        dpi_escala = int(request.POST.get('qualidade', 2))  # Escala 1 (72 DPI), 2 (144 DPI) ou 3 (216 DPI)
+
+        if not arquivo:
+            return HttpResponseBadRequest("Nenhum ficheiro PDF enviado.")
+
+        try:
+            # Lê os bytes do PDF em memória RAM
+            pdf_bytes = arquivo.read()
+            pdf = pdfium.PdfDocument(pdf_bytes)
+            total_paginas = len(pdf)
+
+            if total_paginas == 0:
+                return HttpResponseBadRequest("O ficheiro PDF não contém páginas legíveis.")
+
+            nome_base = arquivo.name.rsplit('.', 1)[0]
+            extensao = 'jpg' if formato_saida == 'JPEG' else 'png'
+            mime_type = 'image/jpeg' if formato_saida == 'JPEG' else 'image/png'
+
+            # Caso 1: PDF de página única -> Devolve a imagem diretamente
+            if total_paginas == 1:
+                pagina = pdf[0]
+                # Renderiza a página para imagem PIL via Pillow
+                imagem_pil = pagina.render(scale=dpi_escala).to_pil()
+
+                if formato_saida == 'JPEG' and imagem_pil.mode != 'RGB':
+                    imagem_pil = imagem_pil.convert('RGB')
+
+                buffer_saida = io.BytesIO()
+                imagem_pil.save(buffer_saida, format=formato_saida, quality=92, optimize=True)
+                buffer_saida.seek(0)
+
+                nome_download = f"{nome_base}_pagina_1.{extensao}"
+                response = HttpResponse(buffer_saida.getvalue(), content_type=mime_type)
+                response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+                return response
+
+            # Caso 2: PDF com múltiplas páginas -> Compila num ficheiro .ZIP em memória
+            buffer_zip = io.BytesIO()
+            with zipfile.ZipFile(buffer_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for idx, pagina in enumerate(pdf):
+                    imagem_pil = pagina.render(scale=dpi_escala).to_pil()
+
+                    if formato_saida == 'JPEG' and imagem_pil.mode != 'RGB':
+                        imagem_pil = imagem_pil.convert('RGB')
+
+                    buffer_img = io.BytesIO()
+                    imagem_pil.save(buffer_img, format=formato_saida, quality=92, optimize=True)
+
+                    nome_pagina = f"pagina_{idx + 1:02d}.{extensao}"
+                    zip_file.writestr(nome_pagina, buffer_img.getvalue())
+
+            buffer_zip.seek(0)
+            nome_download = f"{nome_base}_imagens.zip"
+            response = HttpResponse(buffer_zip.getvalue(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Falha ao processar PDF: {str(e)}")
