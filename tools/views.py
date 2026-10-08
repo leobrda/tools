@@ -1,7 +1,7 @@
 import io
 import numpy as np
 import zipfile
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
 
@@ -499,3 +499,137 @@ def cortar_imagem_view(request):
 
         except Exception as e:
             return HttpResponseBadRequest(f"Falha ao cortar imagem: {str(e)}")
+
+
+def marca_dagua_view(request):
+    if request.method == 'GET':
+        return render(request, 'tools/watermark.html')
+
+    if request.method == 'POST':
+        arquivo_base = request.FILES.get('imagem_base')
+        tipo_marca = request.POST.get('tipo_marca', 'texto')  # 'texto' ou 'logo'
+        posicao = request.POST.get('posicao', 'bottom_right')
+        opacidade = int(request.POST.get('opacidade', 50))  # 10 a 100%
+
+        if not arquivo_base:
+            return HttpResponseBadRequest("Nenhuma imagem base foi enviada.")
+
+        try:
+            # 1. Carrega imagem base e garante modo RGBA para sobreposição
+            img_base = Image.open(arquivo_base).convert('RGBA')
+            largura_base, altura_base = img_base.size
+
+            # Camada transparente onde será desenhada a marca
+            camada_marca = Image.new('RGBA', (largura_base, altura_base), (255, 255, 255, 0))
+
+            alfa_valor = int((opacidade / 100.0) * 255)
+
+            if tipo_marca == 'texto':
+                texto = request.POST.get('texto_marca', 'ToolsHub').strip() or 'ToolsHub'
+                tamanho_fonte = int(request.POST.get('tamanho_fonte', 36))
+                cor_hex = request.POST.get('cor_texto', '#ffffff').lstrip('#')
+
+                try:
+                    r = int(cor_hex[0:2], 16)
+                    g = int(cor_hex[2:4], 16)
+                    b = int(cor_hex[4:6], 16)
+                except Exception:
+                    r, g, b = 255, 255, 255
+
+                # Tenta carregar uma fonte TTF do sistema (Arial), se falhar usa fonte padrão escalada
+                try:
+                    fonte = ImageFont.truetype("arial.ttf", tamanho_fonte)
+                except IOError:
+                    try:
+                        fonte = ImageFont.truetype("DejaVuSans.ttf", tamanho_fonte)
+                    except IOError:
+                        fonte = ImageFont.load_default()
+
+                draw = ImageDraw.Draw(camada_marca)
+                bbox = draw.textbbox((0, 0), texto, font=fonte)
+                largura_txt = bbox[2] - bbox[0]
+                altura_txt = bbox[3] - bbox[1]
+
+                margem = 30
+                if posicao == 'center':
+                    x = (largura_base - largura_txt) // 2
+                    y = (altura_base - altura_txt) // 2
+                elif posicao == 'top_left':
+                    x, y = margem, margem
+                elif posicao == 'top_right':
+                    x = largura_base - largura_txt - margem
+                    y = margem
+                elif posicao == 'bottom_left':
+                    x = margem
+                    y = altura_base - altura_txt - margem
+                else:  # bottom_right
+                    x = largura_base - largura_txt - margem
+                    y = altura_base - altura_txt - margem
+
+                draw.text((x, y), texto, fill=(r, g, b, alfa_valor), font=fonte)
+
+            elif tipo_marca == 'logo':
+                arquivo_logo = request.FILES.get('imagem_logo')
+                if not arquivo_logo:
+                    return HttpResponseBadRequest("Nenhum logótipo enviado.")
+
+                logo = Image.open(arquivo_logo).convert('RGBA')
+
+                # Escala o logótipo para não ultrapassar 25% da largura da imagem base
+                max_largura_logo = int(largura_base * 0.25)
+                proporcao_logo = max_largura_logo / float(logo.size[0])
+                nova_altura_logo = int(float(logo.size[1]) * proporcao_logo)
+                logo = logo.resize((max_largura_logo, nova_altura_logo), Image.Resampling.LANCZOS)
+
+                # Ajusta a opacidade do canal alfa do logótipo
+                r, g, b, a = logo.split()
+                a = a.point(lambda p: int(p * (opacidade / 100.0)))
+                logo.putalpha(a)
+
+                largura_logo, altura_logo = logo.size
+                margem = 30
+
+                if posicao == 'center':
+                    x = (largura_base - largura_logo) // 2
+                    y = (altura_base - altura_logo) // 2
+                elif posicao == 'top_left':
+                    x, y = margem, margem
+                elif posicao == 'top_right':
+                    x = largura_base - largura_logo - margem
+                    y = margem
+                elif posicao == 'bottom_left':
+                    x = margem
+                    y = altura_base - altura_logo - margem
+                else:  # bottom_right
+                    x = largura_base - largura_logo - margem
+                    y = altura_base - altura_logo - margem
+
+                camada_marca.paste(logo, (x, y), logo)
+
+            # 2. Faz a fusão das camadas
+            img_final = Image.alpha_composite(img_base, camada_marca)
+
+            # 3. Exporta mantendo formato original (ou PNG se tinha transparência)
+            formato_saida = 'PNG' if img_base.format == 'PNG' else 'JPEG'
+            buffer_saida = io.BytesIO()
+
+            if formato_saida == 'JPEG':
+                img_final = img_final.convert('RGB')
+                img_final.save(buffer_saida, format='JPEG', quality=92, optimize=True)
+                mime_type = 'image/jpeg'
+                extensao = 'jpg'
+            else:
+                img_final.save(buffer_saida, format='PNG', optimize=True)
+                mime_type = 'image/png'
+                extensao = 'png'
+
+            buffer_saida.seek(0)
+            nome_original = arquivo_base.name.rsplit('.', 1)[0]
+            nome_download = f"{nome_original}_marca_dagua.{extensao}"
+
+            response = HttpResponse(buffer_saida.getvalue(), content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename="{nome_download}"'
+            return response
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Falha ao aplicar marca d'água: {str(e)}")
