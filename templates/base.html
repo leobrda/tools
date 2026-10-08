@@ -3,9 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}ToolsHub - Ferramentas Online Grátis{% endblock %}</title>
+  <title>{% block title %}ToolsHub - Ferramentas Online Grátis e Manipulação em RAM{% endblock %}</title>
 
-  <!-- Script Anti-Flicker: aplica a classe 'dark' antes de renderizar a página -->
+  <!-- Metatags de SEO Essenciais -->
+  <meta name="description" content="{% block meta_description %}Converta, comprima, redimensione e processe fotos e PDFs online e sem limites. 100% grátis, sem armazenamento em disco e processamento seguro em memória RAM.{% endblock %}">
+  <meta name="keywords" content="converter imagem, comprimir foto, remover fundo png, pdf para imagem, imagem para pdf, gerar favicon, cortar foto, marca dagua online, ferramentas online sem login">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+  <!-- Open Graph / Redes Sociais (WhatsApp, Facebook, LinkedIn) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:title" content="{% block og_title %}ToolsHub - Ferramentas Online Rápidas em RAM{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Processamento volátil instantâneo sem guardar ficheiros em servidor.{% endblock %}">
+  <meta property="og:site_name" content="ToolsHub.dev">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ToolsHub.dev - Ferramentas de Ficheiros Sem Registo">
+  <meta name="twitter:description" content="Converta, comprima e edite sem armazenamento permanente.">
+
+  <!-- Script Anti-Flicker -->
   <script>
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
@@ -48,14 +66,12 @@
   </script>
 
   <style>
-    /* Malha de fundo para Modo Claro */
     .bg-grid {
       background-size: 24px 24px;
       background-image:
         linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
     }
-    /* Malha de fundo para Modo Escuro */
     .dark .bg-grid {
       background-image:
         linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
